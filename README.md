@@ -27,6 +27,7 @@ what you need:
 * DCS Interface ==> https://github.com/charlestytler/streamdeck-dcs-interface
 * DCS Interface requires DCS Exports Scripts (https://github.com/asherao/DCS-ExportScripts).
 * The F-15SE lua version included (forked from the fantastic trigati's version)
+* inspired by and borrowing some of the great profiles from Ahsoul, Norsk_L and Tess
 
 Once you have all DCS Export Scripts and DCS Interface running, just upload the profile and off you go...
 
