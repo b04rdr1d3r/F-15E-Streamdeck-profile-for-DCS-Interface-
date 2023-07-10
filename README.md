@@ -16,7 +16,8 @@
                                                                                                     
 (c) Bearcat and Blue Storm 2023
 
-Version 0.9
+Version 1.0
+20230709 - aka Seven of Nine ;-)
 
 what you need:
 
