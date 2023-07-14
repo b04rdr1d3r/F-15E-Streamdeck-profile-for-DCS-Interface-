@@ -18,8 +18,8 @@
                                                                                                     
 (c) Bearcat and Blue Storm 2023
 
-Version 1.0
-20230709 - aka Seven of Nine ;-)
+Version 1.01
+20230714 - aka Bleu-Blanc-Rouge
 
 what you need:
 
@@ -37,3 +37,11 @@ Once you have all DCS Export Scripts and DCS Interface running, just upload the 
 Our goal is to provide you with a tool that gives you access to all the functionalities, you can then rearrange at will according to your ergonomic preferences !
 
 Please let me know any issue/bug you encounter and what you'd really want to have. hop on our discord here ==> https://discord.gg/9FtGbP846A
+
+CHANGELOG:
+version 1.01 20230714 - aka Bleu-Blanc-Rouge
+added canopy control
+removed LEFT + RIGHT Radio channel decrease buttons since those do not work (increment passed to parameter is irrelevant to channel change! we will investigate this but at this time, the only alternate is to keybind channel decrease...)
+
+version 1.0 20230709 - aka Seven of Nine ;-) 
+Initial release version
