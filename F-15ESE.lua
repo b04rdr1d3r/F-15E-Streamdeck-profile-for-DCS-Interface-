@@ -1,8 +1,25 @@
--- F-15E Export 30 June 2023
--- IF YOU ARE USING NORSK-L's STREAMDECK PROFILE THEN YOU MUST SET THE FOLLOWING LINE to 'true'
-Norsk_UFC = false -- true or false
+-- F-15E Export 25 July 2023
+-- IF YOU ARE USING NORSK-L's STREAMDECK PROFILE THEN YOU MUST SET THE FOLLOWING LINE to "TRUE"
+Norsk_UFC = "FALSE" -- "TRUE" or "FALSE"
 
---[[ version 0.7
+-- version 0.8
+-- Altered TOLTAL LBS label to TOTAL on 7368 (user request)
+-- Add Oxygen PSI output, with label to 6554 (user request)
+-- Added Basic Aircraft Data Function and added Current Magnetic Heading Readout to 6015 (user request)
+-- Investigated HUD Data VVI (6009) as reported not working by user - no issue found?
+-- Updated UFC data exports because of changes in patch 2.8.7.42583
+
+-- To Do List:
+
+-- Fix any issues with HUD data (yes I'm pretty sure there will be some) and expand it if possible
+-- Check all argument values and convert to 1d or .1f where possible, only leaving .2f and .3f if actually needed
+-- Create option to turn field labels on/off maybe?
+--------------------------------------------------------------------------------------------------------------
+-- version 0.7a
+-- quick fix for the UFC crashes on GC align or when selecting the PP-EGI option - the F15 sends a really dodgy character that is being sent by the sim which is ok unless its in a modified string with escape characters...
+-- then the export script dies a death and kills the streamdeck integration code as well
+
+-- version 0.7
 -- Had a good neaten up of all the argument values - no IDs have changed on these and no formats (so if it was .2f before it is still .2f now)
 -- But I do want to redo these before this gets finalised so if decimal places are not needed then they do not get exported
 -- Implemented the first round of HUD data display. You can call a single element or get blocks of data:
@@ -15,19 +32,12 @@ Norsk_UFC = false -- true or false
 	-- Alt		- The altitude as diaplyed in the HUD (BARO only I think) 6008
 	-- VVI		- The VVI, with spaces removed 6009
 	-- AA		- I think this data is the weapon selected in AA mode? No ID Set
-	-- NAV		- Every field from the bottom right 6010
 	-- UPLEFT	- Speed and AoA from the left side 6011
 	-- LOLEFT	- Fields from the bottom left, so G AA weapon, mach and G meter 6012
 	-- UPRIGHT	- Alt and VVI from the right side 6013
-    -- LORIGHT	- Nearly the same as NAV but without the bottom line (what does that set of numbers mean anyway?) 6014
+	-- LORIGHT	- Nearly the same as NAV but without the very bottom row of digits...what are they anyway?
 -- Included a radio export as it's not easy to see the frequency when using presets. This draws data from the core sim to supplement the UFC info, separate items or a combined view available 6501 & 6504
 
--- To Do List:
--- Fix any issues with HUD data (yes I'm pretty sure there will be some) and expand it if possible
--- Check all argument values and convert to 1d or .1f where possible, only leaving .2f and .3f if actually needed
--- Create option to turn field labels on/off maybe?]]
-
---------------------------------------------------------------------------------------------------------------
 -- version 0.6a typo corrected! 
 -- version 0.6 
 -- Fixed Left/Right Fuel Counters reading an extra 1000 lbs when < 100 lbs from next thousand - needed new function RoundDP()
@@ -863,29 +873,21 @@ function ExportScript.ProcessIkarusDCSConfigHighImportance(mainPanelDevice)	-- P
 function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)	-- Pointed to by ExportScript.ProcessIkarusDCSConfigLowImportance
 	--ExportScript.Tools.WriteToLog('list_cockpit_params(): '..ExportScript.Tools.dump(list_cockpit_params()))
 	--------------------------------------------------------------------------------------------------------------
-		-- Oxygen PSI gauge export
-		if ExportScript.Config.Debug then
-			ExportScript.Tools.WriteToLog('66554: '..ExportScript.Tools.dump(string.format("%1.0f", mainPanelDevice:get_argument_value(554) * 400)))
-		end
-		local oxyStr = ""
-		oxyStr = string.format("%1.0f", mainPanelDevice:get_argument_value(554) * 400) .. "\nPSI"
-		ExportScript.Tools.SendData(66554, oxyStr)
-		
 	-- TEST DISPLAY
 		ExportScript.Tools.SendData(757575,"⚪⚫\n🟡🔴\n🟢❌")
 	-- ADVANCED UFC IMPLEMENTATION v1
-		if Norsk_UFC == true then
-			PILOT_UFCa(ExportScript.Tools.getListIndicatorValue(8))
+		if Norsk_UFC == "TRUE" then
+			PILOT_UFCa(ExportScript.Tools.getListIndicatorValue(9))	-- Updated 25/7/2023
 		else
-			PILOT_UFC(ExportScript.Tools.getListIndicatorValue(8))
+			PILOT_UFC(ExportScript.Tools.getListIndicatorValue(9))	-- Updated 25/7/2023
 		end
-		WSO_UFC(ExportScript.Tools.getListIndicatorValue(20))
+		WSO_UFC(ExportScript.Tools.getListIndicatorValue(18))	-- Updated 25/7/2023
 	-- COMBINED FUEL DISPLAY
 		ExportScript.Tools.SendData(83830,FUEL_display(mainPanelDevice,0))	-- NOTE EXPORT ID HAS CHANGED
 	-- INDIVIDUAL FUEL DATA
 		-- With Lables
 		ExportScript.Tools.SendData(7383,FUEL_display(mainPanelDevice,"INTL").."\nINTL")
-		ExportScript.Tools.SendData(7368,FUEL_display(mainPanelDevice,"TOTAL").."\nTOTAL LBS")
+		ExportScript.Tools.SendData(7368,FUEL_display(mainPanelDevice,"TOTAL").."\nTOTAL")
 		ExportScript.Tools.SendData(7373,FUEL_display(mainPanelDevice,"LEFT").."\nLEFT")
 		ExportScript.Tools.SendData(7377,FUEL_display(mainPanelDevice,"RIGHT").."\nRIGHT")
 		ExportScript.Tools.SendData(7384,FUEL_display(mainPanelDevice,"BINGO").."\nBINGO")
@@ -943,6 +945,7 @@ function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)	-- Po
 		ExportScript.Tools.SendData(6012,HUD_display(ExportScript.Tools.getListIndicatorValue(1),"LOLEFT"))
 		ExportScript.Tools.SendData(6013,HUD_display(ExportScript.Tools.getListIndicatorValue(1),"UPRIGHT"))
 		ExportScript.Tools.SendData(6014,HUD_display(ExportScript.Tools.getListIndicatorValue(1),"LORIGHT"))
+		ExportScript.Tools.SendData(6015,Aircraft_Data("HDG_MAG"))	-- Added here but not related to HUD
 	-- BASIC RADIO Data - This basically shows the actual frequency of transmit as not easy to see on UFC when in preset mode
 		ExportScript.Tools.SendData(6501,RADIO_display("BOTH",1))
 		ExportScript.Tools.SendData(6502,RADIO_display("CHAN",1))
@@ -950,8 +953,14 @@ function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)	-- Po
 		ExportScript.Tools.SendData(6504,RADIO_display("BOTH",2))
 		ExportScript.Tools.SendData(6505,RADIO_display("CHAN",2))
 		ExportScript.Tools.SendData(6506,RADIO_display("FREQ",2))
+	-- Oxygen PSI gauge export (6554)
+		ExportScript.Tools.SendData(6554,string.format("%1.0f", mainPanelDevice:get_argument_value(554) * 400) .. "\nPSI")
+	-- EXPORT AIRCRAFT NAME TO TARGET
+		dt_output_file = io.open(lfs.writedir().."/Logs/TargetScript.log", "w")
+		dt_output_file:write("E")
+		dt_output_file:close()
 
-	end
+	end	
 --------------------------------------------------------------------------------------------------------------
 -----------------------
 -- GENERAL FUNCTIONS --
@@ -1024,9 +1033,26 @@ function nilToEmpty(value)	-- Converts a nil string to an empty string ""
 ----------------------
 -- CUSTOM FUNCTIONS --
 ----------------------
+function Aircraft_Data(Option)	-- The standard LoMAC Aircraft data extracted and formatted
+	Pilot = LoGetPilotName()
+	--IAS = string.format("%1d",LoGetIndicatedAirSpeed()).."kts"
+	--TAS = string.format("%1d",LoGetTrueAirSpeed()).."kts"
+	--AS = "I "..string.format("%1d",LoGetIndicatedAirSpeed()).."kts\nT "..string.format("%1d",LoGetTrueAirSpeed()).."kts"
+	--Alt_ASL = string.format("%1d",LoGetAltitudeAboveSeaLevel()*3.28084)
+	--Alt_AGL = string.format("%1d",LoGetAltitudeAboveGroundLevel())
+	--AoA = (LoGetAngleOfAttack()*57.2957795).." α"
+	--Mach = "M "..(string.format("%.2f",RoundTo(LoGetMachNumber(),2)))
+	HDG_MAG = string.format("%1d",LoGetMagneticYaw()*57.2957795).."°"
+	--HDG_TRU = string.format("%1d",((LoGetSelfData().Heading)*57.2957795)).."°"
+	--HDG = "HDG\n"..HDG_MAG.." M\n"..HDG_TRU.." SE"
+	--VVel = string.format("%1d",(LoGetVerticalVelocity()*3.28084)*60)
+	return _G[Option]
+	end
+
 function FORMAT_UFC(Input)	-- Re-Formats Data For Clear UFC Display v1
 	Input = Input:gsub(":",".")
 	if string.sub(Input,1,1) == " " then Input = Input:sub(2) end	-- remove leading space
+	--if string.sub(Input,string.len(Input),sting.len(input)) == " " then Input = string.sub(Input,1,string.len(Input)-1) end	-- remove leading space
 	if (string.sub(Input,1,1) == "N" or string.sub(Input,1,1) == "S")
 			and string.sub(Input,2,2) ~= "T" and string.sub(Input,2,2) ~= "P" and string.sub(Input,2,2) ~= "-" and string.sub(Input,2,2) ~= "O" and string.sub(Input,2,2) ~= "Y"
 			and string.sub(Input,2,2) ~= "E" and string.sub(Input,2,2) ~= "B" and string.sub(Input,2,2) ~= "Q" then -- Check for Latitude
@@ -1036,7 +1062,8 @@ function FORMAT_UFC(Input)	-- Re-Formats Data For Clear UFC Display v1
 	elseif (string.sub(Input,(string.len(Input)-2),(string.len(Input))) == "-AM" or string.sub(Input,(string.len(Input)-2),(string.len(Input))) == "-FM" )and string.len(Input) > 7 then
 		return string.sub(Input,1,3).."\n."..string.sub(Input,4,6).."\n"..string.sub(Input,(string.len(Input)-1),(string.len(Input)))
 	elseif string.sub(Input,1,3) == "ILS" and string.len(Input) > 7 then return string.sub(Input,1,3).."\n"..string.sub(Input,5,7).."."..string.sub(Input,8,9)
-	elseif string.sub(Input,1,3) == "MV " then return string.sub(Input,1,2).."\n"..string.sub(Input,4,6).."\n"..string.sub(Input,(string.len(Input)-2),(string.len(Input)))
+	--elseif string.sub(Input, 1,3)== "MV " then return Input:gsub(" ","\n")
+	elseif string.sub(Input,1,3) == "MV " then return string.sub(Input,1,2).."\n"..string.sub(Input,4,5).." "..string.sub(Input,(string.len(Input)-2),(string.len(Input)))
 	elseif string.sub(Input,1,3) == "N-F" or string.sub(Input,1,3) == "A/P"  then return Input:gsub(" ","\n")	-- check as this has lot's of break points and A/P is just annoying...
 	elseif string.sub(Input,1,3) == "R  " then return Input:gsub("   ","\n")	-- How much White space?
 	elseif (string.sub(Input,1,4) == "TIME" or string.sub(Input,1,4) == "ETE " or string.sub(Input,1,4) == "TOA " or string.sub(Input,1,4) == "ETA " or string.sub(Input,1,4) == "TOT ")  and string.len(Input) > 9 then
@@ -1046,11 +1073,11 @@ function FORMAT_UFC(Input)	-- Re-Formats Data For Clear UFC Display v1
 		if string.find(Input,"\n") ~= nil then return Input	-- check if new lines have been created and return or
 		elseif string.len(Input) == 6 then return string.sub(Input,1,3).."\n"..string.sub(Input,4,6)
 		elseif string.len(Input) == 8 then return string.sub(Input,1,4).."\n"..string.sub(Input,5,8)
-		--elseif string.len(Input) == 6 and string.sub(6,6) == "\'" then return Input
+								----elseif string.len(Input) == 6 and string.sub(6,6) == "\'" then return Input
 		else return nilToEmpty(string.sub(Input,1,5)).."\n".. nilToEmpty(string.sub(Input,6,10)).."\n".. nilToEmpty(Input:sub(11))	-- then create new lines at fixed points if needed
 		end
 	else
-		return Input:gsub(":",".")	-- or just retun the <5 char string
+		return Input	-- or just retun the <5 char string
 	end
 	end
 function FORMAT_UFCRAD(Input)	-- Re-Formats Data For Clear UFC RADIO Display v1
@@ -1428,8 +1455,7 @@ function  FlapTile(mainPanelDevice) -- From Bailey's LUA: A grphical indication 
 	else
 		return 'FLAP\n' .. flapOrange .. '\n' .. flapGreen
 	end
-end
-
+	end
 ----------------
 -- NOT IN USE --
 ----------------
