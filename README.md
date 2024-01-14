@@ -16,10 +16,10 @@
 #
 # ########################################################################################################################
                                                                                                     
-(c) Bearcat and Blue Storm 2023
+(c) Bearcat and Blue Storm 2023-2004
 
-Version 1.02
-20230729 - aka Betty Boop
+Version 1.03
+20240114 - aka Arizona Gal
 
 what you need:
 
@@ -38,13 +38,15 @@ Our goal is to provide you with a tool that gives you access to all the function
 
 Please let me know any issue/bug you encounter and what you'd really want to have. hop on our discord here ==> https://discord.gg/9FtGbP846A
 
-CHANGELOG:
+**CHANGELOG:**
+version 1.03 20240112 - aka Arizona Gal
+updated to new version of lua file
+added airbrake position
+added gear lights
 version 1.02 20230729 - aka Betty Boop
 updated lua file to now use the standard version 0.8 from Trigati
 corrected psi indicator to match trigati's standard version
 version 1.01 20230714 - aka Bleu-Blanc-Rouge
 added canopy control
 removed LEFT + RIGHT Radio channel decrease buttons since those do not work (increment passed to parameter is irrelevant to channel change! we will investigate this but at this time, the only alternate is to keybind channel decrease...)
-
-version 1.0 20230709 - aka Seven of Nine ;-) 
-Initial release version
+version 1.0 20230709 - aka Seven of Nine ;-)    Initial release version

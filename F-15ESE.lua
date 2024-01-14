@@ -2,6 +2,12 @@
 -- IF YOU ARE USING NORSK-L's STREAMDECK PROFILE THEN YOU MUST SET THE FOLLOWING LINE to "TRUE"
 Norsk_UFC = "FALSE" -- "TRUE" or "FALSE"
 
+-- version 0.82
+-- aded SpeedBrake % display to ID 6579 by user request
+
+-- version 0.81
+-- removed duplicate guage (383) found by a user.
+
 -- version 0.8
 -- Altered TOLTAL LBS label to TOTAL on 7368 (user request)
 -- Add Oxygen PSI output, with label to 6554 (user request)
@@ -190,7 +196,6 @@ ExportScript.ConfigEveryFrameArguments = 	-- arguments for export every frame (u
 			[339]	= "%.2f",	-- PILOT FLAP Light (green)
 			[338]	= "%.2f",	-- PILOT FLAP Light (yellow)
 		--  Fuel Gauges
-			[383]	= "%.2f",	-- PILOT Fuel Arrow
 			[383]	= "%.2f",	-- PILOT Fuel Needle
 			[382]	= "%.2f",	-- PILOT Fuel OFF Flag
 			[370]	= "%.2f",	-- PILOT Fuel Totalizer Counter 100
@@ -875,6 +880,7 @@ function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)	-- Po
 	--------------------------------------------------------------------------------------------------------------
 	-- TEST DISPLAY
 		ExportScript.Tools.SendData(757575,"⚪⚫\n🟡🔴\n🟢❌")
+
 	-- ADVANCED UFC IMPLEMENTATION v1
 		if Norsk_UFC == "TRUE" then
 			PILOT_UFCa(ExportScript.Tools.getListIndicatorValue(9))	-- Updated 25/7/2023
@@ -955,10 +961,8 @@ function ExportScript.ProcessIkarusDCSConfigLowImportance(mainPanelDevice)	-- Po
 		ExportScript.Tools.SendData(6506,RADIO_display("FREQ",2))
 	-- Oxygen PSI gauge export (6554)
 		ExportScript.Tools.SendData(6554,string.format("%1.0f", mainPanelDevice:get_argument_value(554) * 400) .. "\nPSI")
-	-- EXPORT AIRCRAFT NAME TO TARGET
-		dt_output_file = io.open(lfs.writedir().."/Logs/TargetScript.log", "w")
-		dt_output_file:write("E")
-		dt_output_file:close()
+	-- SpeedBrake
+		ExportScript.Tools.SendData(6579,Mech_Data("SPDBRK_Value"))
 
 	end	
 --------------------------------------------------------------------------------------------------------------
@@ -1046,6 +1050,12 @@ function Aircraft_Data(Option)	-- The standard LoMAC Aircraft data extracted and
 	--HDG_TRU = string.format("%1d",((LoGetSelfData().Heading)*57.2957795)).."°"
 	--HDG = "HDG\n"..HDG_MAG.." M\n"..HDG_TRU.." SE"
 	--VVel = string.format("%1d",(LoGetVerticalVelocity()*3.28084)*60)
+	return _G[Option]
+	end
+function Mech_Data(Option)	-- The standard LoMAC Mech data extracted and formatted
+	mechanisationStatus = LoGetMechInfo()
+	--SPDBRK_Status = mechanisationStatus.speedbrakes.status
+    SPDBRK_Value = string.format("%1d",(mechanisationStatus.speedbrakes.value * 100)).."%"
 	return _G[Option]
 	end
 
